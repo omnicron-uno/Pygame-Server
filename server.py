@@ -1,35 +1,29 @@
-# server.py
 import socket
-import threading
 
-HOST = '0.0.0.0'
-PORT = 10000
+# Server setup
+host = '0.0.0.0'  # Listen on all interfaces (Render will use the public IP)
+port = 10000       # Port number (make sure this matches the one you selected on Render)
 
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind((HOST, PORT))
-server.listen()
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_socket.bind((host, port))
+server_socket.listen(5)
 
-clients = []
+print(f"Server listening on port {port}...")
 
-def handle_client(conn, addr):
-    print(f"[NEW] {addr} connected.")
-    while True:
-        try:
-            data = conn.recv(1024)
-            if not data:
-                break
-            print(f"[RECV from {addr}] {data.decode()}")
-            for c in clients:
-                if c != conn:
-                    c.sendall(data)
-        except:
-            break
-    conn.close()
-    clients.remove(conn)
-    print(f"[DISCONNECT] {addr} disconnected.")
-
-print(f"[LISTENING] on {PORT}")
+# Wait for clients to connect
 while True:
-    conn, addr = server.accept()
-    clients.append(conn)
-    threading.Thread(target=handle_client, args=(conn, addr)).start()
+    client_socket, client_address = server_socket.accept()
+    print(f"Connection from {client_address}")
+
+    # Send a welcome message to the client
+    client_socket.send(b"Welcome to the Pygame server!")
+
+    # Handle the client's requests (this can be modified based on your game's logic)
+    data = client_socket.recv(1024)
+    print(f"Received from client: {data.decode()}")
+
+    # Respond to the client
+    client_socket.send(b"Thanks for connecting!")
+
+    # Close the connection after handling the request
+    client_socket.close()

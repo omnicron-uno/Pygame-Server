@@ -1,29 +1,21 @@
-import socket
+# server.py
+from flask import Flask, request, jsonify
 
-# Server setup
-host = '0.0.0.0'  # Listen on all interfaces (Render will use the public IP)
-port = 10000       # Port number (make sure this matches the one you selected on Render)
+app = Flask(__name__)
 
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_socket.bind((host, port))
-server_socket.listen(5)
+@app.route('/')
+def home():
+    return "Pygame Flask Server is Running!"
 
-print(f"Server listening on port {port}...")
+@app.route('/ping', methods=['GET'])
+def ping():
+    return jsonify({"message": "pong"})
 
-# Wait for clients to connect
-while True:
-    client_socket, client_address = server_socket.accept()
-    print(f"Connection from {client_address}")
+@app.route('/move', methods=['POST'])
+def move():
+    data = request.json
+    print(f"Player moved to: {data}")
+    return jsonify({"status": "received", "position": data})
 
-    # Send a welcome message to the client
-    client_socket.send(b"Welcome to the Pygame server!")
-
-    # Handle the client's requests (this can be modified based on your game's logic)
-    data = client_socket.recv(1024)
-    print(f"Received from client: {data.decode()}")
-
-    # Respond to the client
-    client_socket.send(b"Thanks for connecting!")
-
-    # Close the connection after handling the request
-    client_socket.close()
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=10000)

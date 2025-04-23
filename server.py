@@ -1,35 +1,21 @@
 # server.py
-import socket
-import threading
+from flask import Flask, request, jsonify
 
-HOST = '0.0.0.0'
-PORT = 10000
+app = Flask(__name__)
 
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind((HOST, PORT))
-server.listen()
+@app.route('/')
+def home():
+    return "Pygame Flask Server is Running!"
 
-clients = []
+@app.route('/ping', methods=['GET'])
+def ping():
+    return jsonify({"message": "pong"})
 
-def handle_client(conn, addr):
-    print(f"[NEW] {addr} connected.")
-    while True:
-        try:
-            data = conn.recv(1024)
-            if not data:
-                break
-            print(f"[RECV from {addr}] {data.decode()}")
-            for c in clients:
-                if c != conn:
-                    c.sendall(data)
-        except:
-            break
-    conn.close()
-    clients.remove(conn)
-    print(f"[DISCONNECT] {addr} disconnected.")
+@app.route('/move', methods=['POST'])
+def move():
+    data = request.json
+    print(f"Player moved to: {data}")
+    return jsonify({"status": "received", "position": data})
 
-print(f"[LISTENING] on {PORT}")
-while True:
-    conn, addr = server.accept()
-    clients.append(conn)
-    threading.Thread(target=handle_client, args=(conn, addr)).start()
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=10000)

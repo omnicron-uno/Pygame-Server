@@ -1,45 +1,36 @@
-# server.py
 from flask import Flask, request, jsonify
-import uuid
 
 app = Flask(__name__)
 
 players = {}
 
-@app.route('/join', methods=['POST'])
+@app.route("/join", methods=["POST"])
 def join():
-    player_id = str(uuid.uuid4())
-    players[player_id] = {"x": 0, "y": 0}
+    player_id = str(len(players) + 1)
+    players[player_id] = {"x": 100, "y": 100}
     return jsonify({"player_id": player_id})
 
-@app.route('/move', methods=['POST'])
+@app.route("/move", methods=["POST"])
 def move():
-    data = request.json
+    data = request.get_json()
     player_id = data.get("player_id")
-    x = data.get("x")
-    y = data.get("y")
-
+    pos = data.get("position")
     if player_id in players:
-        players[player_id]["x"] = x
-        players[player_id]["y"] = y
-        return jsonify({"status": "updated"})
-    else:
-        return jsonify({"status": "error", "message": "player not found"}), 404
+        players[player_id] = pos
+    return jsonify({"status": "received"})
 
-@app.route('/players', methods=['GET'])
+@app.route("/players", methods=["GET"])
 def get_players():
     return jsonify(players)
 
-@app.route('/leave', methods=['POST'])
+@app.route("/leave", methods=["POST"])
 def leave():
-    data = request.json
+    data = request.get_json()
     player_id = data.get("player_id")
-
     if player_id in players:
         del players[player_id]
-        return jsonify({"status": "left"})
-    else:
-        return jsonify({"status": "error", "message": "player not found"}), 404
+    return jsonify({"status": "left"})
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=10000)
+@app.route("/ping")
+def ping():
+    return jsonify({"message": "pong"})

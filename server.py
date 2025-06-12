@@ -1,5 +1,10 @@
 from flask import Flask, request, jsonify
 
+import os
+port = int(os.environ.get("PORT", 19099))
+
+app.run(host="0.0.0.0", port=port)
+
 app = Flask(__name__)
 
 players = {}

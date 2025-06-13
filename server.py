@@ -5,7 +5,7 @@ port = int(os.environ.get("PORT", 19099))
 
 app = Flask(__name__)
 
-app.run(host="0.0.0.0", port=port)
+app.run(host="8.8.8.8", port=port)
 
 players = {}
 
